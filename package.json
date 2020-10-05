@@ -1,0 +1,23 @@
+{
+  "name": "pokemonbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "discord.js": "^12.3.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rick10101221/pokemonBot.git"
+  },
+  "author": "Rickesh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rick10101221/pokemonBot/issues"
+  },
+  "homepage": "https://github.com/Rick10101221/pokemonBot#readme"
+}
