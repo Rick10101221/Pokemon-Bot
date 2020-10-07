@@ -30,8 +30,7 @@ let pokemonTypes = [
     'fairy'
 ];
 
-let pokemonObjs = [];
-let pokemonNames = [];
+
 
 client.on('message', message => {
     if (message.author.bot) {
@@ -43,10 +42,10 @@ client.on('message', message => {
     let splitMsg = msg.split(" ");
 
     if (splitMsg.length == 1 && splitMsg[0] == "!p") {
-        // fetchKantoPokemon();
-        fetchPokemon();
+        await fetchKantoPokemon(message);
+        //fetchPokemon();
+        //fillPokemonNames();
         fillPokemonNames();
-        // fillPokemonNames();
         message.channel.send(pokemonNames[0]);
         // message.channel.send('------------------------------------------------------------------------------------------------------' +
         //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
@@ -67,32 +66,50 @@ client.on('message', message => {
 });
 
 
-const fetchPokemon = () => {
-    const url = 'https://pokeapi.co/api/v2/pokemon/1';
-    fetch(url)
-        .then((res) => {
-            return res.json();
-        })
-        .then((data) => {
-            const pokemon = {};
-            pokemon['name'] = data.name;
-            pokemonObjs.push(pokemon);
-        });
-};
+// const fetchPokemon = () => {
+//     const url = 'https://pokeapi.co/api/v2/pokemon/1';
+//     fetch(url)
+//         .then((res) => {
+//             return res.json();
+//         })
+//         .then((data) => {
+//             const pokemon = {};
+//             pokemon['name'] = data.name;
+//             pokemonObjs.push(pokemon);
+//         });
+// };
 
-// async function fetchKantoPokemon(message) {
-//     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
-//     .then(response => response.json())
-//     //.then(allpokemon => message.channel.send(allpokemon))
-//     .then(allpokemon => pokemonObjs.push(allpokemon.results))
-//     .catch(pokemonNames.push('error'));
-// }
+let pokemonObjs = [];
+let pokemonNames = [];
+
+async function fetchKantoPokemon(message) {
+    await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
+    .then(response => response.json())
+    .then(allpokemon => {
+        pokemonObjs = allpokemon.results;
+        console.log('94', pokemonNames);
+        // message.channel.send(pokemonNames[0]);
+    })
+    .catch(error => console.log(error));
+}
 
 function fillPokemonNames() {
-    for (const obj in pokemonObjs) {
-        pokemonNames.push(obj.name);
+    //console.log(pokemonObjs);
+    console.log('102', pokemonObjs);
+    for (let obj in pokemonObjs) {
+        console.log('103', obj);
+        pokemonNames.push(pokemonObjs[obj].name);
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 
