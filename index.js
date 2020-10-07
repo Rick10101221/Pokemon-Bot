@@ -32,7 +32,7 @@ let pokemonTypes = [
 
 
 
-client.on('message', message => {
+client.on('message', async (message) => {
     if (message.author.bot) {
         return;
     }
@@ -46,7 +46,7 @@ client.on('message', message => {
         //fetchPokemon();
         //fillPokemonNames();
         fillPokemonNames();
-        message.channel.send(pokemonNames[0]);
+        message.channel.send(pokemonNames);
         // message.channel.send('------------------------------------------------------------------------------------------------------' +
         //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
         //     'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
