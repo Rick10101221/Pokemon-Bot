@@ -8,6 +8,9 @@ client.login(token);
 
 const fetch = require("node-fetch");
 
+let pokemonObjs = [];
+let pokemonNames = [];
+
 // 18 Types
 let pokemonTypes = [
     'normal', 
@@ -31,6 +34,7 @@ let pokemonTypes = [
 ];
 
 
+let testing = [];
 
 client.on('message', async (message) => {
     if (message.author.bot) {
@@ -42,12 +46,19 @@ client.on('message', async (message) => {
     let splitMsg = msg.split(" ");
 
     if (splitMsg.length == 1 && splitMsg[0] == "!p") {
-        await fetchKantoPokemon(message);
+        await fetchKantoPokemon();
         //fetchPokemon();
         //fillPokemonNames();
-        fillPokemonNames();
-        message.channel.send(pokemonNames);
-        // message.channel.send('------------------------------------------------------------------------------------------------------' +
+        //fillPokemonNames();
+        console.log(testing);
+
+        try {
+            message.channel.send(testing[0]);
+        }
+        catch{
+            message.channel.send('error');
+        }
+        // message.channel.send('-------------------------------------------------------------------------------------------------------' +
         //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
         //     'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
         //     'Pro tip: `!p type` will automatically display strengths!\n' +
@@ -66,41 +77,62 @@ client.on('message', async (message) => {
 });
 
 
-// const fetchPokemon = () => {
-//     const url = 'https://pokeapi.co/api/v2/pokemon/1';
-//     fetch(url)
-//         .then((res) => {
-//             return res.json();
-//         })
-//         .then((data) => {
-//             const pokemon = {};
-//             pokemon['name'] = data.name;
-//             pokemonObjs.push(pokemon);
-//         });
-// };
-
-let pokemonObjs = [];
-let pokemonNames = [];
-
-async function fetchKantoPokemon(message) {
+async function fetchKantoPokemon() {
+    let temp = [];
     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
-    .then(response => response.json())
-    .then(allpokemon => {
-        pokemonObjs = allpokemon.results;
-        console.log('94', pokemonNames);
-        // message.channel.send(pokemonNames[0]);
-    })
-    .catch(error => console.log(error));
+    .then(async (response) => await response.json()) 
+    .then(async function(allpokemon) {
+        await allpokemon.results.forEach(async function(pokemon) {
+            let url = pokemon.url;
+            await fetch(url)
+            .then(async (response) => await response.json())
+            .then(function(pokeData) {
+                console.log(pokeData.sprites.front_default);
+                //temp.push(pokeData.sprites.front_default);
+                temp.push(pokeData.sprites.front_default);
+            });
+            
+            
+            //console.log(await fetchPokemonData(pokemon));
+            //temp.push(await fetchPokemonData(pokemon));
+        });
+    });
+    console.log('89', temp);
 }
 
-function fillPokemonNames() {
-    //console.log(pokemonObjs);
-    console.log('102', pokemonObjs);
-    for (let obj in pokemonObjs) {
-        console.log('103', obj);
-        pokemonNames.push(pokemonObjs[obj].name);
-    }
+async function fetchPokemonData(pokemon) {
+    let url = pokemon.url;
+
+    //let temp = [];
+    await fetch(url)
+    .then(response => response.json())
+    .then(async function(pokeData) {
+        console.log(pokeData.sprites.front_default);
+        //temp.push(pokeData.sprites.front_default);
+        return pokeData.sprites.front_default;
+    });
 }
+
+
+// async function fetchKantoPokemon() {
+//     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
+//     .then(response => response.json())
+//     .then(allpokemon => {
+//         pokemonObjs = allpokemon.results;
+//         console.log('94', pokemonNames);
+//     })
+//     .catch(error => console.log(error));
+// }
+
+// function fillPokemonNames() {
+//     console.log(pokemonObjs);
+//     console.log('102', pokemonObjs);
+//     for (let obj in pokemonObjs) {
+//         // console.log(pokemonObjs);
+//         // console.log(pokemonObjs[obj]);
+//         pokemonNames.push(pokemonObjs[obj].name);
+//     }
+// }
 
 
 
