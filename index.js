@@ -8,7 +8,6 @@ client.login(token);
 
 const fetch = require("node-fetch");
 
-let pokemonObjs = [];
 let pokemonNames = [];
 let pokemonUrls = [];
 let pokemonSprites = [];
@@ -83,6 +82,7 @@ async function fetchUrls() {
     .then(async (response) => await response.json()) 
     .then(async function(allpokemon) {
         await allpokemon.results.forEach(async function(pokemon) {
+            pokemonNames.push(pokemon.name);
             pokemonUrls.push(pokemon.url);
         });
     });
@@ -97,71 +97,6 @@ async function fetchSprites(url) {
         pokemonSprites.push(pokeData.sprites.front_default);
     });
 }
-
-// let url = pokemon.url;
-//             await fetch(url)
-//             .then(async (response) => await response.json())
-//             .then(function(pokeData) {
-//                 console.log(pokeData.sprites.front_default);
-//                 temp.push(pokeData.sprites.front_default);
-
-
-
-async function fetchPokemonData(pokemon) {
-    let url = pokemon.url;
-
-    //let temp = [];
-    await fetch(url)
-    .then(response => response.json())
-    .then(async function(pokeData) {
-        console.log(pokeData.sprites.front_default);
-        //temp.push(pokeData.sprites.front_default);
-        return pokeData.sprites.front_default;
-    });
-}
-
-
-
-
-
-
-
-
-// async function fetchKantoPokemon() {
-//     let temp = [];
-//     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
-//     .then(async (response) => await response.json()) 
-//     .then(async function(allpokemon) {
-//         await allpokemon.results.forEach(async function(pokemon) {
-//             let url = pokemon.url;
-//             await fetch(url)
-//             .then(async (response) => await response.json())
-//             .then(function(pokeData) {
-//                 console.log(pokeData.sprites.front_default);
-//                 //temp.push(pokeData.sprites.front_default);
-//                 temp.push(pokeData.sprites.front_default);
-//             });
-            
-            
-//             //console.log(await fetchPokemonData(pokemon));
-//             //temp.push(await fetchPokemonData(pokemon));
-//         });
-//     });
-//     console.log('89', temp);
-// }
-
-// async function fetchPokemonData(pokemon) {
-//     let url = pokemon.url;
-
-//     //let temp = [];
-//     await fetch(url)
-//     .then(response => response.json())
-//     .then(async function(pokeData) {
-//         console.log(pokeData.sprites.front_default);
-//         //temp.push(pokeData.sprites.front_default);
-//         return pokeData.sprites.front_default;
-//     });
-// }
 
 
 // async function fetchKantoPokemon() {
