@@ -8,9 +8,19 @@ client.login(token);
 
 const fetch = require("node-fetch");
 
+let booted = false;
 let pokemonNames = [];
 let pokemonUrls = [];
 let pokemonSprites = [];
+
+/*
+    TODO: 
+    1. Check if sending a message in a specific channel
+    2. Choose a random index and print the pokemon's name and sprite.
+    3. Figure out how to print 'You caught a level ___ _____! You now have ____ pokemon'
+    3. Figure out how to create player profiles and add
+    caught pokemon to a database.
+*/
 
 // 18 Types
 let pokemonTypes = [
@@ -44,11 +54,8 @@ client.on('message', async (message) => {
 
     let splitMsg = msg.split(" ");
 
-    if (splitMsg.length == 1 && splitMsg[0] == "!p") {
+    if (splitMsg.length == 1 && splitMsg[0] == "!b" && booted == false) {
         await fetchUrls();
-        //fetchPokemon();
-        //fillPokemonNames();
-        //fillPokemonNames();
         console.log('53', pokemonUrls);
 
         for (let i = 0; i < pokemonUrls.length; i++) {
@@ -57,6 +64,7 @@ client.on('message', async (message) => {
         }
 
         message.channel.send('done');
+        booted = true;
         // message.channel.send('-------------------------------------------------------------------------------------------------------' +
         //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
         //     'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
@@ -74,7 +82,6 @@ client.on('message', async (message) => {
     //     }
     // }
 });
-
 
 
 async function fetchUrls() {
@@ -118,16 +125,6 @@ async function fetchSprites(url) {
 //         pokemonNames.push(pokemonObjs[obj].name);
 //     }
 // }
-
-
-
-
-
-
-
-
-
-
 
 
 function findWeaknesses(type) {
