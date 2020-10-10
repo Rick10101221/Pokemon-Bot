@@ -10,6 +10,8 @@ const fetch = require("node-fetch");
 
 let pokemonObjs = [];
 let pokemonNames = [];
+let pokemonUrls = [];
+let pokemonSprites = [];
 
 // 18 Types
 let pokemonTypes = [
@@ -34,8 +36,6 @@ let pokemonTypes = [
 ];
 
 
-let testing = [];
-
 client.on('message', async (message) => {
     if (message.author.bot) {
         return;
@@ -46,18 +46,18 @@ client.on('message', async (message) => {
     let splitMsg = msg.split(" ");
 
     if (splitMsg.length == 1 && splitMsg[0] == "!p") {
-        await fetchKantoPokemon();
+        await fetchUrls();
         //fetchPokemon();
         //fillPokemonNames();
         //fillPokemonNames();
-        console.log(testing);
+        console.log('53', pokemonUrls);
 
-        try {
-            message.channel.send(testing[0]);
+        for (let i = 0; i < pokemonUrls.length; i++) {
+            console.log('current url', pokemonUrls[i]);
+            pokemonSprites.push(await fetchSprites(pokemonUrls[i]));
         }
-        catch{
-            message.channel.send('error');
-        }
+
+        message.channel.send('done');
         // message.channel.send('-------------------------------------------------------------------------------------------------------' +
         //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
         //     'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
@@ -77,28 +77,35 @@ client.on('message', async (message) => {
 });
 
 
-async function fetchKantoPokemon() {
-    let temp = [];
+
+async function fetchUrls() {
     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
     .then(async (response) => await response.json()) 
     .then(async function(allpokemon) {
         await allpokemon.results.forEach(async function(pokemon) {
-            let url = pokemon.url;
-            await fetch(url)
-            .then(async (response) => await response.json())
-            .then(function(pokeData) {
-                console.log(pokeData.sprites.front_default);
-                //temp.push(pokeData.sprites.front_default);
-                temp.push(pokeData.sprites.front_default);
-            });
-            
-            
-            //console.log(await fetchPokemonData(pokemon));
-            //temp.push(await fetchPokemonData(pokemon));
+            pokemonUrls.push(pokemon.url);
         });
     });
-    console.log('89', temp);
 }
+
+async function fetchSprites(url) {
+    console.log('92', url);
+    await fetch(url)
+    .then(async (response) => await response.json())
+    .then(function(pokeData) {
+        console.log(pokeData.sprites.front_default);
+        pokemonSprites.push(pokeData.sprites.front_default);
+    });
+}
+
+// let url = pokemon.url;
+//             await fetch(url)
+//             .then(async (response) => await response.json())
+//             .then(function(pokeData) {
+//                 console.log(pokeData.sprites.front_default);
+//                 temp.push(pokeData.sprites.front_default);
+
+
 
 async function fetchPokemonData(pokemon) {
     let url = pokemon.url;
@@ -112,6 +119,49 @@ async function fetchPokemonData(pokemon) {
         return pokeData.sprites.front_default;
     });
 }
+
+
+
+
+
+
+
+
+// async function fetchKantoPokemon() {
+//     let temp = [];
+//     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
+//     .then(async (response) => await response.json()) 
+//     .then(async function(allpokemon) {
+//         await allpokemon.results.forEach(async function(pokemon) {
+//             let url = pokemon.url;
+//             await fetch(url)
+//             .then(async (response) => await response.json())
+//             .then(function(pokeData) {
+//                 console.log(pokeData.sprites.front_default);
+//                 //temp.push(pokeData.sprites.front_default);
+//                 temp.push(pokeData.sprites.front_default);
+//             });
+            
+            
+//             //console.log(await fetchPokemonData(pokemon));
+//             //temp.push(await fetchPokemonData(pokemon));
+//         });
+//     });
+//     console.log('89', temp);
+// }
+
+// async function fetchPokemonData(pokemon) {
+//     let url = pokemon.url;
+
+//     //let temp = [];
+//     await fetch(url)
+//     .then(response => response.json())
+//     .then(async function(pokeData) {
+//         console.log(pokeData.sprites.front_default);
+//         //temp.push(pokeData.sprites.front_default);
+//         return pokeData.sprites.front_default;
+//     });
+// }
 
 
 // async function fetchKantoPokemon() {
