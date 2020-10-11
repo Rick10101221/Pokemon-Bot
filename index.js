@@ -8,6 +8,9 @@ client.login(token);
 
 const fetch = require("node-fetch");
 
+let catchPokemonChannelId = '762567190980722711'
+let pokemonInfoId = '764739550840881192'
+
 let booted = false;
 let pokemonNames = [];
 let pokemonUrls = [];
@@ -51,12 +54,13 @@ client.on('message', async (message) => {
     }
 
     msg = message.content.toLowerCase();
+    msg = msg.trim();
 
     let splitMsg = msg.split(" ");
 
-    if (splitMsg.length == 1 && splitMsg[0] == "!b" && booted == false) {
+    if (message.channel.id === catchPokemonChannelId && splitMsg.length == 1 &&
+        splitMsg[0] === "!b" && booted == false) {
         await fetchUrls();
-        console.log('53', pokemonUrls);
 
         for (let i = 0; i < pokemonUrls.length; i++) {
             console.log('current url', pokemonUrls[i]);
@@ -65,22 +69,25 @@ client.on('message', async (message) => {
 
         message.channel.send('done');
         booted = true;
-        // message.channel.send('-------------------------------------------------------------------------------------------------------' +
-        //     '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
-        //     'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
-        //     'Pro tip: `!p type` will automatically display strengths!\n' +
-        //     '----------------------------------------------------------------------------------------------------------------------------');
-    } //else if (splitMsg[0] == "!p") {
-    //     if (pokemonTypes.includes(splitMsg[1])) {
-    //         if (splitMsg[2] == 'weaknesses') {
-    //             message.channel.send('.\n' + findWeaknesses(splitMsg[1]));
-    //         } else {
-    //             message.channel.send('.\n'+ findStrengths(splitMsg[1]));
-    //         }
-    //     } else {
-    //         message.channel.send("Format not recognized. Please use `!p type [strengths or weaknesses]`");
-    //     }
-    // }
+        
+    } else if (message.channel.id === pokemonInfoId && splitMsg[0] === '!p') {
+        if (msg === '!p') {
+            message.channel.send('-------------------------------------------------------------------------------------------------------' +
+            '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
+            'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
+            'Pro tip: `!p type` will automatically display strengths!\n' +
+            '------------------------------------------------------------------------------------------------------------------------------');
+        } else if (pokemonTypes.includes(splitMsg[1])) {
+            if (splitMsg[2] == 'weaknesses') {
+                message.channel.send('.\n' + findWeaknesses(splitMsg[1]));
+            } else {
+                message.channel.send('.\n'+ findStrengths(splitMsg[1]));
+            }
+        } else {
+            message.channel.send('Format not recognized. Please use ' + 
+            '`!p type [strengths or weaknesses]`');
+        }
+    }
 });
 
 
@@ -96,11 +103,11 @@ async function fetchUrls() {
 }
 
 async function fetchSprites(url) {
-    console.log('92', url);
+    //console.log('92', url);
     await fetch(url)
     .then(async (response) => await response.json())
     .then(function(pokeData) {
-        console.log(pokeData.sprites.front_default);
+        //console.log(pokeData.sprites.front_default);
         pokemonSprites.push(pokeData.sprites.front_default);
     });
 }
