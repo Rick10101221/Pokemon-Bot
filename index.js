@@ -16,14 +16,6 @@ let pokemonNames = [];
 let pokemonUrls = [];
 let pokemonSprites = [];
 
-/*
-    TODO: 
-    1. How to check contents of last message.
-    2. Figure out how to print 'You caught a level ___ _____! You now have ____ pokemon'
-    3. Figure out how to create player profiles and add
-    caught pokemon to a database.
-*/
-
 // 18 Types
 let pokemonTypes = [
     'normal', 
@@ -47,6 +39,19 @@ let pokemonTypes = [
 ];
 
 
+/*
+    TODO:
+    1. How to check contents of last message.
+    2. Figure out how to print 'You caught a level ___ _____! You now have ____ pokemon'
+    3. Add function descriptions
+    4. Figure out how to create player profiles and add
+    caught pokemon to a database.
+*/
+
+
+bootup();
+
+
 client.on('message', async (message) => {
     if (message.author.bot) {
         return;
@@ -58,21 +63,10 @@ client.on('message', async (message) => {
     let splitMsg = msg.split(" ");
 
     if (message.channel.id === catchPokemonChannelId) {
-        if (msg === '!b' && booted == false) {
-            await fetchUrls();
-
-            for (let i = 0; i < pokemonUrls.length; i++) {
-                console.log('current url', pokemonUrls[i]);
-                await fetchSprites(pokemonUrls[i]);
-            }
-
-            message.channel.send('done');
-            booted = true;
-        } else if (splitMsg[0] === '!catch' && booted == true) {
+        if (splitMsg[0] === '!catch' && booted == true) {
             let index = randomNumber(pokemonSprites.length);
             message.channel.send(pokemonSprites[index]);
-        }
-        
+        } 
     } else if (message.channel.id === pokemonInfoId) {
         if (splitMsg[0] === '!p') {
             if (msg === '!p') {
@@ -96,6 +90,18 @@ client.on('message', async (message) => {
 });
 
 
+async function bootup() {
+    await fetchUrls();
+
+    for (let i = 0; i < pokemonUrls.length; i++) {
+        console.log('current url', pokemonUrls[i]);
+        await fetchSprites(pokemonUrls[i]);
+    }
+
+    booted = true;
+}
+
+
 function randomNumber(max) {
     return Math.floor(Math.random() * max);
 }
@@ -111,6 +117,7 @@ async function fetchUrls() {
         });
     });
 }
+
 
 async function fetchSprites(url) {
     //console.log('92', url);
@@ -204,6 +211,7 @@ function findWeaknesses(type) {
     }
     return text;
 }
+
 
 function findStrengths(type) {
     let text = '';
