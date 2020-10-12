@@ -8,8 +8,15 @@ client.login(token);
 
 const fetch = require("node-fetch");
 
+
+// =====================================================================
+// =====================================================================
+// ======================CHANGE WHEN SWITCHING SERVERS==================
 let catchPokemonChannelId = '762567190980722711'
 let pokemonInfoId = '764739550840881192'
+// =====================================================================
+// =====================================================================
+
 
 let booted = false;
 let pokemonNames = [];
@@ -38,6 +45,10 @@ let pokemonTypes = [
     'fairy'
 ];
 
+let minInterval = 0.1;
+// min, 60 seconds in min, 1000 milliseconds
+const imgInterval = minInterval * 60 * 1000;
+
 
 /*
     TODO:
@@ -48,8 +59,20 @@ let pokemonTypes = [
     caught pokemon to a database.
 */
 
-
 bootup();
+
+// client.on('ready', function() {
+//     await bootup();
+//     console.log('ready');
+
+//     client.setInterval(function (channel) {
+        
+//     }
+// });
+
+
+let lastAuthorId = '';
+let lastPokemonName = '';
 
 
 client.on('message', async (message) => {
@@ -63,10 +86,22 @@ client.on('message', async (message) => {
     let splitMsg = msg.split(" ");
 
     if (message.channel.id === catchPokemonChannelId) {
-        if (splitMsg[0] === '!catch' && booted == true) {
-            let index = randomNumber(pokemonSprites.length);
-            message.channel.send(pokemonSprites[index]);
-        } 
+        if (splitMsg[0] === '!start' && booted == true) {
+            console.log('started');
+            let interval = client.setInterval(function() {
+                try {
+                    sendRandomSprite(message);
+                } catch (error) {
+                    console.log(error.stack);
+                }
+            }, imgInterval);
+        } else if (booted == true && splitMsg[0] === '!catch') {
+            if (splitMsg[1] === lastPokemonName) {
+                sendCaughtMessage(message);
+            } else {
+                sendFailedMessage(message);
+            }
+        }
     } else if (message.channel.id === pokemonInfoId) {
         if (splitMsg[0] === '!p') {
             if (msg === '!p') {
@@ -93,17 +128,14 @@ client.on('message', async (message) => {
 async function bootup() {
     await fetchUrls();
 
+    
     for (let i = 0; i < pokemonUrls.length; i++) {
+    //for (let i = 0; i < 1; i++) {
         console.log('current url', pokemonUrls[i]);
         await fetchSprites(pokemonUrls[i]);
     }
 
     booted = true;
-}
-
-
-function randomNumber(max) {
-    return Math.floor(Math.random() * max);
 }
 
 
@@ -120,13 +152,48 @@ async function fetchUrls() {
 
 
 async function fetchSprites(url) {
-    //console.log('92', url);
     await fetch(url)
     .then(async (response) => await response.json())
     .then(function(pokeData) {
-        //console.log(pokeData.sprites.front_default);
         pokemonSprites.push(pokeData.sprites.front_default);
     });
+}
+
+
+function sendRandomSprite(message) {
+    let index = randomNumber(pokemonSprites.length);
+    lastPokemonName = pokemonNames[index];
+    //message.channel.send('Who\'s that Pokemon??');
+    message.channel.send(pokemonSprites[index] +
+        ' ' + lastPokemonName);
+    //message.channel.send('```Who\'s that Pokemon?```\n' + 
+    //                    pokemonSprites[index]);
+}
+
+
+function randomNumber(max) {
+    return Math.floor(Math.random() * max);
+}
+
+
+function sendCaughtMessage(message) {
+    let name = lastPokemonName.charAt(0).toUpperCase() + 
+               lastPokemonName.slice(1);
+    message.channel.send('Congradulations! You caught a level ' +
+                         randomLevel() + ' ' + name);
+}
+
+
+function sendFailedMessage(message) {
+    let name = lastPokemonName.charAt(0).toUpperCase() + 
+               lastPokemonName.slice(1);
+    message.channel.send('That\'s not right! The level ' + randomLevel() + ' ' +
+                         name + ' ran away!');
+}
+
+
+function randomLevel() {
+    return Math.floor(Math.random() * 100);
 }
 
 
