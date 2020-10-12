@@ -18,12 +18,14 @@ let pokemonInfoId = '764739550840881192'
 // =====================================================================
 
 
-let booted = false;
-let pokemonNames = [];
-let pokemonUrls = [];
-let pokemonSprites = [];
+let booted = false;             // whether or not sprites have been loaded
+let caught = false;             // whether or not the last pokemon was caught
+let lastPokemonName = '';       // name of last sent pokemon by bot
+let pokemonNames = [];          // list of all pokemon names in db (loaded)
+let pokemonUrls = [];           // list of all pokemon objects in db
+let pokemonSprites = [];        // list of all pokemon sprites in db
 
-// 18 Types
+// 18 Pokemon Types
 let pokemonTypes = [
     'normal', 
     'fire', 
@@ -45,6 +47,7 @@ let pokemonTypes = [
     'fairy'
 ];
 
+// Sprites are sent at minInterval * 1 min
 let minInterval = 0.1;
 // min, 60 seconds in min, 1000 milliseconds
 const imgInterval = minInterval * 60 * 1000;
@@ -52,50 +55,45 @@ const imgInterval = minInterval * 60 * 1000;
 
 /*
     TODO:
-    1. How to check contents of last message.
-    2. Figure out how to print 'You caught a level ___ _____! You now have ____ pokemon'
-    3. Add function descriptions
-    4. Figure out how to create player profiles and add
+    1. Add function descriptions
+    2. Figure out how to create player profiles and add
     caught pokemon to a database.
+    3. Add '!pokedex' function.
+    4. Add modular api calls for fetchUrls.
 */
 
 bootup();
 
-// client.on('ready', function() {
-//     await bootup();
-//     console.log('ready');
-
-//     client.setInterval(function (channel) {
-        
-//     }
-// });
-
-
-let lastAuthorId = '';
-let lastPokemonName = '';
-
-
+// Event listener for incoming messages
 client.on('message', async (message) => {
     if (message.author.bot) {
         return;
     }
 
+    // adjusts message for easier parsing
     msg = message.content.toLowerCase();
     msg = msg.trim();
 
     let splitMsg = msg.split(" ");
 
+    // First channel: channel set for catching pokemon
+    // Second channel: channel for pokemon info
     if (message.channel.id === catchPokemonChannelId) {
-        if (splitMsg[0] === '!start' && booted == true) {
+        // boots game: loads sprites and names list. else if trying to
+        // catch pokemon and pokemon hasn't been caught, check for user
+        // input and name equality
+        if (splitMsg[0] === '!start' && booted) {
             console.log('started');
+            // sends messages at the specified interval above
             let interval = client.setInterval(function() {
                 try {
+                    caught = false;
                     sendRandomSprite(message);
                 } catch (error) {
                     console.log(error.stack);
                 }
             }, imgInterval);
-        } else if (booted == true && splitMsg[0] === '!catch') {
+        } else if (booted && !caught && splitMsg[0] === '!catch') {
             if (splitMsg[1] === lastPokemonName) {
                 sendCaughtMessage(message);
             } else {
@@ -103,6 +101,8 @@ client.on('message', async (message) => {
             }
         }
     } else if (message.channel.id === pokemonInfoId) {
+        // either print tutorial or checks if second user input is actually 
+        // a pokemon type. otherwise, print incorrect format.
         if (splitMsg[0] === '!p') {
             if (msg === '!p') {
                 message.channel.send('-------------------------------------------------------------------------------------------------------' +
@@ -125,10 +125,14 @@ client.on('message', async (message) => {
 });
 
 
+
+/**
+ * Boots up catch channel: fetch api call will load pokemon names, and urls.
+ * Then, for each url in global var, makes another fetch call for sprites.
+ */
 async function bootup() {
     await fetchUrls();
 
-    
     for (let i = 0; i < pokemonUrls.length; i++) {
     //for (let i = 0; i < 1; i++) {
         console.log('current url', pokemonUrls[i]);
@@ -139,6 +143,9 @@ async function bootup() {
 }
 
 
+/**
+ * Fetches urls given a fixed endpoint.
+ */
 async function fetchUrls() {
     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
     .then(async (response) => await response.json()) 
@@ -151,6 +158,10 @@ async function fetchUrls() {
 }
 
 
+/**
+ * Loads global pokemon sprites through given url.
+ * @param {String} url Fetch Api Call Endpoint.
+ */
 async function fetchSprites(url) {
     await fetch(url)
     .then(async (response) => await response.json())
@@ -160,6 +171,10 @@ async function fetchSprites(url) {
 }
 
 
+/**
+ * Chooses and sends a random pokemon sprite from global sprites list.
+ * @param {Message} message Discord.js Message object for send call.
+ */
 function sendRandomSprite(message) {
     let index = randomNumber(pokemonSprites.length);
     lastPokemonName = pokemonNames[index];
@@ -171,53 +186,57 @@ function sendRandomSprite(message) {
 }
 
 
+/**
+ * Generates a random index for sendRandomSprite use.
+ * @param {int} max Size of pokemon sprites list.
+ * @return Random index for accessing into sendRandomSprite.
+ */
 function randomNumber(max) {
     return Math.floor(Math.random() * max);
 }
 
 
+/**
+ * Sends a congradulations message for catching a pokemon with a randomly
+ * generated level.
+ * @param {Message} message Discord.js Message object for send call. 
+ */
 function sendCaughtMessage(message) {
     let name = lastPokemonName.charAt(0).toUpperCase() + 
                lastPokemonName.slice(1);
     message.channel.send('Congradulations! You caught a level ' +
                          randomLevel() + ' ' + name);
+    caught = true;
 }
 
 
+/**
+ * Sends a failure message for incorrectly guessing the pokemon name
+ * with a randomly generated level.
+ * @param {Message} message Discord.js Message object for send call. 
+ */
 function sendFailedMessage(message) {
     let name = lastPokemonName.charAt(0).toUpperCase() + 
                lastPokemonName.slice(1);
     message.channel.send('That\'s not right! The level ' + randomLevel() + ' ' +
                          name + ' ran away!');
+    caught = false;
 }
 
 
+/**
+ * Generates a random level for the generated pokemon.
+ */
 function randomLevel() {
     return Math.floor(Math.random() * 100);
 }
 
 
-// async function fetchKantoPokemon() {
-//     await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
-//     .then(response => response.json())
-//     .then(allpokemon => {
-//         pokemonObjs = allpokemon.results;
-//         console.log('94', pokemonNames);
-//     })
-//     .catch(error => console.log(error));
-// }
-
-// function fillPokemonNames() {
-//     console.log(pokemonObjs);
-//     console.log('102', pokemonObjs);
-//     for (let obj in pokemonObjs) {
-//         // console.log(pokemonObjs);
-//         // console.log(pokemonObjs[obj]);
-//         pokemonNames.push(pokemonObjs[obj].name);
-//     }
-// }
-
-
+/**
+ * Returns a list of pokemon weaknesses for a given type.
+ * @param {String} type Input pokemon type.
+ * @return A concatenated list of all of type's weaknesses.
+ */
 function findWeaknesses(type) {
     let text = '';
     switch(type) {
@@ -280,6 +299,11 @@ function findWeaknesses(type) {
 }
 
 
+/**
+ * Returns a list of pokemon strengths for a given type.
+ * @param {String} type Input pokemon type.
+ * @return A concatenated list of all of type's strengths.
+ */
 function findStrengths(type) {
     let text = '';
     switch(type) {
