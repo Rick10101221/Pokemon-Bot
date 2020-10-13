@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const tokenFile = require('./token.js');
-const token = tokenFile.token;
+const { token } = require('./config.json');
 
 client.login(token);
 
 const fetch = require("node-fetch");
+// let func = require('./functions.js')
 
 
 // =====================================================================
@@ -55,11 +55,10 @@ const imgInterval = minInterval * 60 * 1000;
 
 /*
     TODO:
-    1. Add function descriptions
-    2. Figure out how to create player profiles and add
+    1. Figure out how to create player profiles and add
     caught pokemon to a database.
-    3. Add '!pokedex' function.
-    4. Add modular api calls for fetchUrls.
+    2. Add '!pokedex' function.
+    3. Add modular api calls for fetchUrls.
 */
 
 bootup();
@@ -123,7 +122,6 @@ client.on('message', async (message) => {
         }
     }
 });
-
 
 
 /**
