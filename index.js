@@ -13,6 +13,7 @@ const fetch = require("node-fetch");
 // https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png
 // 895 is maximum. Then jumps to 10001 => 10116
 // 1011 total
+let maxPokemon = 1011;
 
 
 // =====================================================================
@@ -57,7 +58,7 @@ let pokemonTypes = [
 ];
 
 // Sprites are sent at minInterval * 1 min
-let minInterval = 0.01;
+let minInterval = 0.2;
 // min, 60 seconds in min, 1000 milliseconds
 const imgInterval = minInterval * 60 * 1000;
 
@@ -97,11 +98,11 @@ client.on('message', async (message) => {
             notStarted = true;
             console.log('executed');
             // sends messages at the specified interval above
-            let interval = client.setInterval(function() {
+            let interval = client.setInterval(async function() {
                 try {
                     caught = false;
                     guessed = false;
-                    sendRandomSprite(message);
+                    await sendRandomSprite(message);
                 } catch (error) {
                     console.log(error.stack);
                 }
@@ -149,7 +150,7 @@ client.on('message', async (message) => {
  * Then, for each url in global var, makes another fetch call for sprites.
  */
 async function bootup() {
-    await fetchUrls();
+    await fetchNames();
 
     for (let i = 0; i < pokemonUrls.length; i++) {
         console.log(pokemonUrls[i]);
@@ -162,13 +163,12 @@ async function bootup() {
 /**
  * Fetches urls given a fixed endpoint.
  */
-async function fetchUrls() {
+async function fetchNames() {
     await fetch('https://pokeapi.co/api/v2/pokemon?limit=1009')
-    .then(async (response) => await response.json()) 
+    .then(response => response.json()) 
     .then(async function(allpokemon) {
         await allpokemon.results.forEach(async function(pokemon) {
             pokemonNames.push(pokemon.name);
-            pokemonUrls.push(pokemon.url);
         });
     });
 }
@@ -191,11 +191,20 @@ async function fetchSprites(url) {
  * Chooses and sends a random pokemon sprite from global sprites list.
  * @param {Message} message Discord.js Message object for send call.
  */
-function sendRandomSprite(message) {
-    let index = randomNumber(pokemonSprites.length);
+async function sendRandomSprite(message) {
+    //let index = randomNumber(pokemonSprites.length);
+    let index = randomNumber(maxPokemon);
+    console.log(index);
     lastPokemonName = pokemonNames[index];
+    console.log(pokemonNames[index]);
+    if (index > 895) {
+        index += 9107;
+    }
+    index++;
+    let sprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' +
+                 index + '.png';
     //message.channel.send('Who\'s that Pokemon??');
-    message.channel.send(pokemonSprites[index]);
+    message.channel.send(sprite);
     //message.channel.send('```Who\'s that Pokemon?```\n' + 
     //                    pokemonSprites[index]);
 }
