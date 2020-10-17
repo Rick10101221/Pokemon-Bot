@@ -9,6 +9,12 @@ const fetch = require("node-fetch");
 // let func = require('./functions.js')
 
 
+// Image url (Format)
+// https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png
+// 895 is maximum. Then jumps to 10001 => 10116
+// 1011 total
+
+
 // =====================================================================
 // =====================================================================
 // ======================CHANGE WHEN SWITCHING SERVERS==================
@@ -146,7 +152,7 @@ async function bootup() {
     await fetchUrls();
 
     for (let i = 0; i < pokemonUrls.length; i++) {
-        console.log('current url', pokemonUrls[i]);
+        console.log(pokemonUrls[i]);
         await fetchSprites(pokemonUrls[i]);
     }
 
