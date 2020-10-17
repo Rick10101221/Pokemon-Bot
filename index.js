@@ -32,8 +32,8 @@ let guessed = false;            // whether or not a player has guessed
 let currentLevel = 0;           // the current pokemon's level
 let lastPokemonName = '';       // name of last sent pokemon by bot
 let pokemonNames = [];          // list of all pokemon names in db (loaded)
-let pokemonUrls = [];           // list of all pokemon objects in db
-let pokemonSprites = [];        // list of all pokemon sprites in db
+// let pokemonUrls = [];           // list of all pokemon objects in db
+// let pokemonSprites = [];        // list of all pokemon sprites in db
 
 // 18 Pokemon Types
 let pokemonTypes = [
@@ -146,24 +146,9 @@ client.on('message', async (message) => {
 
 
 /**
- * Boots up catch channel: fetch api call will load pokemon names, and urls.
- * Then, for each url in global var, makes another fetch call for sprites.
+ * Boots up catch channel: fetch api call will load pokemon names.
  */
 async function bootup() {
-    await fetchNames();
-
-    for (let i = 0; i < pokemonUrls.length; i++) {
-        console.log(pokemonUrls[i]);
-        await fetchSprites(pokemonUrls[i]);
-    }
-
-    booted = true;
-}
-
-/**
- * Fetches urls given a fixed endpoint.
- */
-async function fetchNames() {
     await fetch('https://pokeapi.co/api/v2/pokemon?limit=1009')
     .then(response => response.json()) 
     .then(async function(allpokemon) {
@@ -171,24 +156,14 @@ async function fetchNames() {
             pokemonNames.push(pokemon.name);
         });
     });
+    booted = true;
 }
 
-
 /**
- * Loads global pokemon sprites through given url.
- * @param {String} url Fetch Api Call Endpoint.
- */
-async function fetchSprites(url) {
-    await fetch(url)
-    .then(async (response) => await response.json())
-    .then(function(pokeData) {
-        pokemonSprites.push(pokeData.sprites.front_default);
-    });
-}
-
-
-/**
- * Chooses and sends a random pokemon sprite from global sprites list.
+ * Chooses and sends a random pokemon sprite from url with a randomly
+ * generated index. The index also corresponds to a name in the pokemon
+ * names list. The url will be autoadjusted (since the api is weird) by
+ * a constant so we do not make any bad requests.
  * @param {Message} message Discord.js Message object for send call.
  */
 async function sendRandomSprite(message) {
@@ -388,3 +363,47 @@ function findStrengths(type) {
     }
     return text;
 }
+
+
+
+
+
+
+
+
+
+
+
+/*
+Deprecated Functions. Found improvements in runtime.
+
+async function bootup() {
+    await fetchNames();
+
+    for (let i = 0; i < pokemonUrls.length; i++) {
+        console.log(pokemonUrls[i]);
+        await fetchSprites(pokemonUrls[i]);
+    }
+
+    booted = true;
+}
+
+async function fetchNames() {
+    await fetch('https://pokeapi.co/api/v2/pokemon?limit=1009')
+    .then(response => response.json()) 
+    .then(async function(allpokemon) {
+        await allpokemon.results.forEach(async function(pokemon) {
+            pokemonNames.push(pokemon.name);
+            pokemonUrls.push(pokemon.url);
+        });
+    });
+}
+
+async function fetchSprites(url) {
+    await fetch(url)
+    .then(async (response) => await response.json())
+    .then(function(pokeData) {
+        pokemonSprites.push(pokeData.sprites.front_default);
+    });
+}
+*/
