@@ -12,14 +12,17 @@ const fetch = require("node-fetch");
 // =====================================================================
 // =====================================================================
 // ======================CHANGE WHEN SWITCHING SERVERS==================
-let catchPokemonChannelId = '762567190980722711'
-let pokemonInfoId = '764739550840881192'
+let catchPokemonChannelId = '766560627954941963'
+let pokemonInfoId = '766560317735829534'
 // =====================================================================
 // =====================================================================
 
 
 let booted = false;             // whether or not sprites have been loaded
+let notStarted = false;         // whether or not the player has started the game
 let caught = false;             // whether or not the last pokemon was caught
+let guessed = false;            // whether or not a player has guessed
+let currentLevel = 0;           // the current pokemon's level
 let lastPokemonName = '';       // name of last sent pokemon by bot
 let pokemonNames = [];          // list of all pokemon names in db (loaded)
 let pokemonUrls = [];           // list of all pokemon objects in db
@@ -48,17 +51,20 @@ let pokemonTypes = [
 ];
 
 // Sprites are sent at minInterval * 1 min
-let minInterval = 0.1;
+let minInterval = 5;
 // min, 60 seconds in min, 1000 milliseconds
 const imgInterval = minInterval * 60 * 1000;
 
 
 /*
     TODO:
-    1. Figure out how to create player profiles and add
+    1. Battles AI (pick random pokemon from pokedex)
+    2. Figure out how to create player profiles and add
     caught pokemon to a database.
-    2. Add '!pokedex' function.
-    3. Add modular api calls for fetchUrls.
+    3. Add '!pokedex' function.
+    4. Add modular api calls for fetchUrls.
+    5. Battle from own pokedex (random pokemon)
+    6. Battle with other players (1 pokemon)
 */
 
 bootup();
@@ -81,19 +87,27 @@ client.on('message', async (message) => {
         // boots game: loads sprites and names list. else if trying to
         // catch pokemon and pokemon hasn't been caught, check for user
         // input and name equality
-        if (splitMsg[0] === '!start' && booted) {
+        if (splitMsg[0] === '!start' && booted && !notStarted) {
+            notStarted = true;
             console.log('started');
             // sends messages at the specified interval above
             let interval = client.setInterval(function() {
                 try {
                     caught = false;
+                    guessed = false;
                     sendRandomSprite(message);
                 } catch (error) {
                     console.log(error.stack);
                 }
             }, imgInterval);
-        } else if (booted && !caught && splitMsg[0] === '!catch') {
-            if (splitMsg[1] === lastPokemonName) {
+        } else if (booted && splitMsg[0] === '!catch') {
+            if (!guessed) {
+                currentLevel = randomLevel();
+                guessed = true;
+            }
+            if (caught) {
+                message.channel.send('The pokemon has already been caught!');
+            } else if (splitMsg[1] === lastPokemonName) {
                 sendCaughtMessage(message);
             } else {
                 sendFailedMessage(message);
@@ -106,18 +120,18 @@ client.on('message', async (message) => {
             if (msg === '!p') {
                 message.channel.send('-------------------------------------------------------------------------------------------------------' +
                 '\nUse me to find the strengths and weaknesses of Pokemon types!\n' + 
-                'Type **`!p type [strengths or weaknesses]`** to get started.\n' + 
+                'Type **`!p type [w]`** to get started.\n' + 
                 'Pro tip: `!p type` will automatically display strengths!\n' +
                 '------------------------------------------------------------------------------------------------------------------------------');
             } else if (pokemonTypes.includes(splitMsg[1])) {
-                if (splitMsg[2] == 'weaknesses') {
+                if (splitMsg[2] == 'w' && splitMsg[2] == 'weakness') {
                     message.channel.send('.\n' + findWeaknesses(splitMsg[1]));
                 } else {
                     message.channel.send('.\n'+ findStrengths(splitMsg[1]));
                 }
             } else {
                 message.channel.send('Format not recognized. Please use ' + 
-                '`!p type [strengths or weaknesses]`');
+                '`!p type [w]`');
             }
         }
     }
@@ -177,8 +191,7 @@ function sendRandomSprite(message) {
     let index = randomNumber(pokemonSprites.length);
     lastPokemonName = pokemonNames[index];
     //message.channel.send('Who\'s that Pokemon??');
-    message.channel.send(pokemonSprites[index] +
-        ' ' + lastPokemonName);
+    message.channel.send(pokemonSprites[index]);
     //message.channel.send('```Who\'s that Pokemon?```\n' + 
     //                    pokemonSprites[index]);
 }
@@ -202,8 +215,8 @@ function randomNumber(max) {
 function sendCaughtMessage(message) {
     let name = lastPokemonName.charAt(0).toUpperCase() + 
                lastPokemonName.slice(1);
-    message.channel.send('Congradulations! You caught a level ' +
-                         randomLevel() + ' ' + name);
+    message.channel.send('Congratulations! You caught a level ' +
+                         currentLevel + ' ' + name);
     caught = true;
 }
 
@@ -216,8 +229,8 @@ function sendCaughtMessage(message) {
 function sendFailedMessage(message) {
     let name = lastPokemonName.charAt(0).toUpperCase() + 
                lastPokemonName.slice(1);
-    message.channel.send('That\'s not right! The level ' + randomLevel() + ' ' +
-                         name + ' ran away!');
+    message.channel.send('That\'s not right! You missed a level ' + 
+                         currentLevel + ' pokemon!');
     caught = false;
 }
 
