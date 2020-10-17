@@ -51,7 +51,7 @@ let pokemonTypes = [
 ];
 
 // Sprites are sent at minInterval * 1 min
-let minInterval = 5;
+let minInterval = 0.01;
 // min, 60 seconds in min, 1000 milliseconds
 const imgInterval = minInterval * 60 * 1000;
 
@@ -89,7 +89,7 @@ client.on('message', async (message) => {
         // input and name equality
         if (splitMsg[0] === '!start' && booted && !notStarted) {
             notStarted = true;
-            console.log('started');
+            console.log('executed');
             // sends messages at the specified interval above
             let interval = client.setInterval(function() {
                 try {
@@ -146,7 +146,6 @@ async function bootup() {
     await fetchUrls();
 
     for (let i = 0; i < pokemonUrls.length; i++) {
-    //for (let i = 0; i < 1; i++) {
         console.log('current url', pokemonUrls[i]);
         await fetchSprites(pokemonUrls[i]);
     }
@@ -154,12 +153,11 @@ async function bootup() {
     booted = true;
 }
 
-
 /**
  * Fetches urls given a fixed endpoint.
  */
 async function fetchUrls() {
-    await fetch('https://pokeapi.co/api/v2/pokemon?limit=151')
+    await fetch('https://pokeapi.co/api/v2/pokemon?limit=1009')
     .then(async (response) => await response.json()) 
     .then(async function(allpokemon) {
         await allpokemon.results.forEach(async function(pokemon) {
