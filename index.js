@@ -176,8 +176,7 @@ async function sendRandomSprite(message) {
         index += 9107;
     }
     index++;
-    let sprite = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' +
-                 index + '.png';
+    let sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index}.png`;
     //message.channel.send('Who\'s that Pokemon??');
     message.channel.send(sprite);
     //message.channel.send('```Who\'s that Pokemon?```\n' + 
@@ -203,8 +202,8 @@ function randomNumber(max) {
 function sendCaughtMessage(message) {
     let name = lastPokemonName.charAt(0).toUpperCase() + 
                lastPokemonName.slice(1);
-    message.channel.send('Congratulations! You caught a level ' +
-                         currentLevel + ' ' + name);
+    message.channel.send(`Congratulations! You caught a level 
+                        ${currentLevel} ${name}`);
     caught = true;
 }
 
