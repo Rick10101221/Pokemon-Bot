@@ -156,8 +156,10 @@ async function bootup() {
             pokemonNames.push(pokemon.name);
         });
     });
+    console.log('booted');
     booted = true;
 }
+
 
 /**
  * Chooses and sends a random pokemon sprite from url with a randomly
